@@ -1,5 +1,6 @@
 import { INestApplication, Logger } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing"
+import * as supertest from "supertest"
 
 import { initializeModuleAndApp } from "../test"
 import { HealthModule } from "./health.module"
@@ -36,8 +37,14 @@ describe("Health", () => {
 
   describe("GET /health", () => {
     it("should return status 200", async () => {
-      await app.inject({method: "GET", url:"/health"})
-      .then(({payload}) => expect(JSON.parse(payload)).toMatchObject({
+      console.log("works too")
+      await supertest
+        .agent(app.getHttpServer())
+        .get("/health")
+        .set("Accept", "application/json")
+        .expect("Content-Type", /json/)
+        .expect(200)
+        .expect({
           status: "ok",
           info: {
               api: { status: "up" },
@@ -46,7 +53,7 @@ describe("Health", () => {
           details: {
               api: { status: "up" },
           },
-      }))
+      })
     })
   })
 })
