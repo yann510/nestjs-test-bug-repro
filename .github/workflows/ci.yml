@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Increase watcher limit
+        run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Use Node.js 14.18.0
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.18.0
+
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: ./node_modules
+          key: modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Install npm packages
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm i
+
+      - name: Start api
+        run: npm start &
+
+      - name: Build affected apps
+        run: npm run build
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Run e2e tests
+        run: npm run test:e2e
