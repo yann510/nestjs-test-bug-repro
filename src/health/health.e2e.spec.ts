@@ -1,12 +1,12 @@
 import { INestApplication, Logger } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing"
-import * as supertest from "supertest"
 
 import { initializeModuleAndApp } from "../test"
 import { HealthModule } from "./health.module"
+import {NestFastifyApplication} from "@nestjs/platform-fastify";
 
 describe("Health", () => {
-  let app: INestApplication
+  let app: NestFastifyApplication
 
   beforeAll(async () => {
     // testingHelper = await new TestingHelper().initializeModuleAndApp("health", [HealthModule])
@@ -36,23 +36,17 @@ describe("Health", () => {
 
   describe("GET /health", () => {
     it("should return status 200", async () => {
-      console.log("works too")
-      await supertest
-        .agent(app.getHttpServer())
-        .get("/health")
-        .set("Accept", "application/json")
-        .expect("Content-Type", /json/)
-        .expect(200)
-        .expect({
+      await app.inject({method: "GET", url:"/health"})
+      .then(({payload}) => expect(JSON.parse(payload)).toMatchObject({
           status: "ok",
           info: {
-            api: { status: "up" },
+              api: { status: "up" },
           },
           error: {},
           details: {
-            api: { status: "up" },
+              api: { status: "up" },
           },
-        })
+      }))
     })
   })
 })

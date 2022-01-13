@@ -16,13 +16,14 @@ import { Test, TestingModule } from "@nestjs/testing"
 
 // import { configurationTest } from "../config/configuration.test"
 import { HealthModule } from "./health/health.module"
+import {FastifyAdapter, NestFastifyApplication} from "@nestjs/platform-fastify"
 // import { getRootModuleImports } from "./utils"
 
 export const initializeModuleAndApp = async (
   testName: string,
   importedModules: ModuleMetadata["imports"],
   providers: Provider[] = undefined
-): Promise<INestApplication> => {
+): Promise<NestFastifyApplication> => {
   // const databaseName = `stator_test_${testName}`
   // const configuration = configurationTest.bind(this, databaseName)
   //
@@ -40,21 +41,13 @@ export const initializeModuleAndApp = async (
   // await app.init()
   // await app.getHttpAdapter().getInstance().ready()
 
-  console.time("createTestingModule")
   const moduleRef = await Test.createTestingModule({
     imports: [HealthModule],
   })
     .setLogger(new Logger("TestingHelper"))
     .compile()
-  console.timeEnd("createTestingModule")
-
-  console.time("createNestApplication")
-  const app = moduleRef.createNestApplication()
-  console.timeEnd("createNestApplication")
-
-  console.time("init")
+  const app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter())
   await app.init()
-  console.timeEnd("init")
 
   return app
 }
