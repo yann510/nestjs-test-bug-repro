@@ -46,10 +46,10 @@ export const initializeModuleAndApp = async (
   })
     .setLogger(new Logger("TestingHelper"))
     .compile()
-  const app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter())
+  const app = moduleRef.createNestApplication(new FastifyAdapter())
   await app.init()
 
-  return app
+  return app as NestFastifyApplication
 }
 
 // export class TestingHelper {
