@@ -24,32 +24,15 @@ export const initializeModuleAndApp = async (
   importedModules: ModuleMetadata["imports"],
   providers: Provider[] = undefined
 ): Promise<NestFastifyApplication> => {
-  // const databaseName = `stator_test_${testName}`
-  // const configuration = configurationTest.bind(this, databaseName)
-  //
-  // const options: ConnectionOptions = { ...configuration().database }
-  // const connection = await createConnection(options)
-  // await this.createDatabaseIfNotExist(connection, databaseName)
-
-  // const moduleRef = await Test.createTestingModule({
-  //   imports: [...importedModules],
-  //   providers: providers,
-  // }).compile()
-  //
-  // const app = moduleRef.createNestApplication(new FastifyAdapter())
-  //
-  // await app.init()
-  // await app.getHttpAdapter().getInstance().ready()
-
   const moduleRef = await Test.createTestingModule({
     imports: [HealthModule],
   })
     .setLogger(new Logger("TestingHelper"))
     .compile()
-  const app = moduleRef.createNestApplication(new FastifyAdapter())
+  const app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter())
   await app.init()
 
-  return app as NestFastifyApplication
+  return app
 }
 
 // export class TestingHelper {
